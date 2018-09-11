@@ -2,11 +2,12 @@ package com.example.bryan.androiddemo;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class Game {
@@ -21,7 +22,7 @@ public class Game {
         public static final long NOTIFICATION_ANIMATION_TIME = GameView.BASE_ANIMATION_TIME * 5;
         public static final long NOTIFICATION_DELAY_TIME = MOVE_ANIMATION_TIME
                 + SPAWN_ANIMATION_TIME;
-        private static final String HIGH_SCORE = "high score";
+        private static final String PERSONAL_BEST = "Personal Best";
 
     public static final int startingMaxValue = 2048;
 
@@ -36,18 +37,12 @@ public class Game {
         final int startTiles = 2;
 
         public int gameState = 0;
-        public boolean canUndo;
 
-        public long score = 0;
-        public long highScore = 0;
+        public long turns = 0;
+        public String moves = "0";
+        public String personalBest = "N/A";
 
-        public long lastScore = 0;
-        public int lastGameState = 0;
-
-        private long bufferScore = 0;
-        private int bufferGameState = 0;
-
-        private HashMap<Integer, Integer> spMap;
+        private SoundPool soundPool;
 
         private Context mContext;
 
@@ -56,6 +51,7 @@ public class Game {
         public Game(Context context, GameView view) {
             mContext = context;
             mView = view;
+            initSoundPool();
         }
 
         public void newGame() {
@@ -65,12 +61,9 @@ public class Game {
                 grid.clearGrid();
             }
             aGrid = new AnimationGrid(numSquaresX, numSquaresY);
-            highScore = getHighScore();
-            if (score >= highScore) {
-                highScore = score;
-                recordHighScore();
-            }
-            score = 0;
+            personalBest = getPersonalBest();
+            turns = 0;
+            moves = "0";
             gameState = GAME_NORMAL;
             addStartTiles();
             mView.refreshLastTime = true;
@@ -86,8 +79,7 @@ public class Game {
 
         private void addRandomTile() {
             if (grid.isCellsAvailable()) {
-                int value = Math.random() < 0.9 ? 2 : 4;
-                Tile tile = new Tile(grid.randomAvailableCell(), value);
+                Tile tile = new Tile(grid.randomAvailableCell(), 2);
                 spawnTile(tile);
             }
         }
@@ -102,14 +94,14 @@ public class Game {
             SharedPreferences settings = PreferenceManager
                     .getDefaultSharedPreferences(mContext);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putLong(HIGH_SCORE, highScore);
-            editor.commit();
+            editor.putString(PERSONAL_BEST, personalBest);
+            editor.apply();
         }
 
-        private long getHighScore() {
+        private String getPersonalBest() {
             SharedPreferences settings = PreferenceManager
                     .getDefaultSharedPreferences(mContext);
-            return settings.getLong(HIGH_SCORE, -1);
+            return settings.getString(PERSONAL_BEST, "N/A");
         }
 
         private void prepareTiles() {
@@ -152,6 +144,7 @@ public class Game {
             boolean moved = false;
 
             prepareTiles();
+            playClick();
 
             for (int xx : traversalsX) {
                 for (int yy : traversalsY) {
@@ -179,17 +172,10 @@ public class Game {
                             int[] extras = {xx, yy};
                             aGrid.startAnimation(merged.getX(), merged.getY(),
                                     MOVE_ANIMATION, MOVE_ANIMATION_TIME, 0, extras); // Direction:
-                            // 0
-                            // =
-                            // MOVING
-                            // MERGED
+
                             aGrid.startAnimation(merged.getX(), merged.getY(),
                                     MERGE_ANIMATION, SPAWN_ANIMATION_TIME,
                                     MOVE_ANIMATION_TIME, null);
-
-                            // Update the score
-                            score = score + merged.getValue();
-                            highScore = Math.max(score, highScore);
 
                             // The mighty 2048 tile
                             if (merged.getValue() >= winValue() && !gameWon()) {
@@ -202,8 +188,7 @@ public class Game {
                             aGrid.startAnimation(positions[0].getX(),
                                     positions[0].getY(), MOVE_ANIMATION,
                                     MOVE_ANIMATION_TIME, 0, extras); // Direction: 1
-                            // = MOVING
-                            // NO MERGE
+
                         }
 
                         if (!positionsEqual(cell, tile)) {
@@ -214,6 +199,8 @@ public class Game {
             }
 
             if (moved) {
+                turns++;
+                moves = String.valueOf(turns);
                 addRandomTile();
                 checkLose();
             }
@@ -224,15 +211,29 @@ public class Game {
         private void checkLose() {
             if (!movesAvailable() && !gameWon()) {
                 gameState = GAME_LOST;
+                loseGame();
+            }
+            else if(gameWon()){
                 endGame();
             }
+            else{
+            }
         }
+
+    private void loseGame() {
+        aGrid.startAnimation(-1, -1, FADE_GLOBAL_ANIMATION,
+                NOTIFICATION_ANIMATION_TIME, NOTIFICATION_DELAY_TIME, null);
+    }
 
         private void endGame() {
             aGrid.startAnimation(-1, -1, FADE_GLOBAL_ANIMATION,
                     NOTIFICATION_ANIMATION_TIME, NOTIFICATION_DELAY_TIME, null);
-            if (score >= highScore) {
-                highScore = score;
+            if(personalBest.equals("N/A")){
+                personalBest = moves;
+                recordHighScore();
+            }
+            else if (turns <= Integer.parseInt(personalBest)) {
+                personalBest = moves;
                 recordHighScore();
             }
         }
@@ -324,4 +325,18 @@ public class Game {
         private int winValue() {
                 return startingMaxValue;
             }
+
+    private void initSoundPool() {
+        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+    }
+
+    private void playClick(){
+        AudioManager am = (AudioManager) mView.getContext().getSystemService(
+                Context.AUDIO_SERVICE);
+        float audioMaxVolumn = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        float audioCurrentVolumn = am
+                .getStreamVolume(AudioManager.STREAM_MUSIC);
+        float volumnRatio = audioCurrentVolumn / audioMaxVolumn;
+        soundPool.play( soundPool.load(mView.getContext(), R.raw.click, 1), volumnRatio, volumnRatio, 1, 0, 1);
+    }
 }

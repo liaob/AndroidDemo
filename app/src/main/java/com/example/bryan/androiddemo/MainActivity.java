@@ -7,19 +7,39 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Window;
+import android.widget.RelativeLayout;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 
 public class MainActivity extends AppCompatActivity {
 
     GameView view;
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
-    public static final String SCORE = "score";
-    public static final String HIGH_SCORE = "high score temp";
+    public static final String MOVES = "moves";
+    public static final String PERSONAL_BEST = "personal best";
     public static final String GAME_STATE = "game state";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        AdView adView = new AdView(this);
+        adView.setAdSize(AdSize.BANNER);
+        adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+
+        // Add the AdView to the view hierarchy. The view will have no size
+        // until the ad is loaded.
+        RelativeLayout layout = new RelativeLayout(this);
+        layout.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,    RelativeLayout.LayoutParams.MATCH_PARENT));
+        // Create an ad request.
+        // get test ads on a physical device.
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        // Start loading the ad in the background.
+        adView.loadAd(adRequest);
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         view = new GameView(getBaseContext());
 
@@ -32,7 +52,19 @@ public class MainActivity extends AppCompatActivity {
                 load();
             }
         }
-        setContentView(view);
+
+        RelativeLayout.LayoutParams adParams =
+                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+        adParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        adParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+
+        layout.addView(view);
+        layout.addView(adView, adParams);
+
+
+        setContentView(layout);
+
     }
 
     @Override
@@ -84,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        editor.putLong(SCORE, view.game.score);
-        editor.putLong(HIGH_SCORE, view.game.highScore);
+        editor.putString(MOVES, view.game.moves);
+        editor.putString(PERSONAL_BEST, view.game.personalBest);
         editor.putInt(GAME_STATE, view.game.gameState);
         editor.commit();
     }
@@ -113,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        view.game.score = settings.getLong(SCORE, view.game.score);
-        view.game.highScore = settings.getLong(HIGH_SCORE, view.game.highScore);
+        view.game.moves = settings.getString(MOVES, view.game.moves);
+        view.game.personalBest = settings.getString(PERSONAL_BEST, view.game.personalBest);
         view.game.gameState = settings.getInt(GAME_STATE, view.game.gameState);
     }
 }
