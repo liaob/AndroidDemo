@@ -1,4 +1,4 @@
-package com.example.bryan.androiddemo;
+package io.github.liaob.game2;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -25,6 +25,7 @@ public class GameView extends View{
     private int gridWidth = 0;
     private int TEXT_BLACK;
     private int TEXT_WHITE;
+    private int TEXT_PINK;
     private int TEXT_BROWN;
     public int startingX;
     public int headerX;
@@ -340,7 +341,7 @@ public class GameView extends View{
         int middleX = width / 2;
         int middleY = length / 2;
         if (win) {
-            paint.setColor(TEXT_WHITE);
+            paint.setColor(TEXT_PINK);
             paint.setAlpha(255);
             paint.setTextSize(gameOverTextSize);
             paint.setTextAlign(Paint.Align.CENTER);
@@ -507,6 +508,7 @@ public class GameView extends View{
 
             newGameIcon = resources.getDrawable(R.drawable.ic_2048_new);
 
+            TEXT_PINK = resources.getColor(R.color.text_pink);
             TEXT_WHITE = resources.getColor(R.color.text_white);
             TEXT_BLACK = resources.getColor(R.color.text_black);
             TEXT_BROWN = resources.getColor(R.color.text_brown);

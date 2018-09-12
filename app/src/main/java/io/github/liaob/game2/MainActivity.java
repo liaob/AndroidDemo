@@ -1,4 +1,4 @@
-package com.example.bryan.androiddemo;
+package io.github.liaob.game2;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
@@ -14,7 +14,7 @@ import com.google.android.gms.ads.AdView;
 
 public class MainActivity extends AppCompatActivity {
 
-    GameView view;
+    public GameView view;
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
     public static final String MOVES = "moves";
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
         AdView adView = new AdView(this);
         adView.setAdSize(AdSize.BANNER);
-        adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+        adView.setAdUnitId("ca-app-pub-1617721984588470/5625067599");
 
         // Add the AdView to the view hierarchy. The view will have no size
         // until the ad is loaded.

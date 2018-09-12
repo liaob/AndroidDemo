@@ -1,4 +1,4 @@
-package com.example.bryan.androiddemo;
+package io.github.liaob.game2;
 
 public class Cell {
     private int x;

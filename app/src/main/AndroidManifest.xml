@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.bryan.androiddemo">
+    package="io.github.liaob.game2">
 
     <application
         android:allowBackup="true"
@@ -18,8 +18,8 @@
         </activity>
         <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:name="com.google.android.gms.ads.ca-app-pub-1617721984588470~5489336225"
+            android:value="ca-app-pub-1617721984588470~5489336225"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

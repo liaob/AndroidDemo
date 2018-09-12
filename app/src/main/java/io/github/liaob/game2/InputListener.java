@@ -1,4 +1,4 @@
-package com.example.bryan.androiddemo;
+package io.github.liaob.game2;
 
 import android.view.MotionEvent;
 import android.view.View;
